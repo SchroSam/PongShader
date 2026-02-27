@@ -2,6 +2,10 @@
 #include "cpup/canis.h"
 #include "cpup/scene.h"
 #include "cpup/model.h"
+#include "cpup/entity.h"
+
+#include "math.h"
+
 
 #include <SDL3/SDL.h>
 
