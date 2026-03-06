@@ -1,20 +1,72 @@
 #pragma once
 #include "cpup/canis.h"
+#include "cpup/math.h"
 #include "cpup/scene.h"
 #include "cpup/model.h"
+#include "cpup/io.h"
+#include "cpup/inputmanager.h"
+#include <stdio.h>
 
 typedef struct {
     int var;
 } Paddle;
 
 void PaddleStart(AppContext* _app, Entity* _entity) {
-    _entity->color = InitVector4(1.0f, 1.0f, 1.0f, 1.0f);
+    if(_entity->name == "LeftPaddle")
+        _entity->color = InitVector4(1.0f, 0.1f, 0.1f, 1.0f);
+    else
+        _entity->color = InitVector4(0.1f, 0.2f, 1.0f, 1.0f);
+
     _entity->transform.rotation = 0.0f;
     _entity->transform.scale = InitVector3(32.0f, 128.0f, 1.0f);
 }
 
 void PaddleUpdate(AppContext* _app, Entity* _entity) {
 
+    if (GetKey(_app, SDL_SCANCODE_S) && _entity->name == "LeftPaddle")
+    {
+        _entity->velocity = InitVector2(0.0f, -1.0f * 150.0f);
+
+        Vector3 nextPos = Vec3Add(_entity->transform.position, Vec2ToVec3(Vec2Mul(_entity->velocity, _app->deltaTime)));
+        
+        if(nextPos.y > 0.0f + _entity->transform.scale.y / 2)
+            _entity->transform.position = nextPos;
+    }
+
+    else if (GetKey(_app, SDL_SCANCODE_W) && _entity->name == "LeftPaddle")
+    {
+        _entity->velocity = InitVector2(0.0f, 1.0f * 150.0f);
+
+        Vector3 nextPos = Vec3Add(_entity->transform.position, Vec2ToVec3(Vec2Mul(_entity->velocity, _app->deltaTime)));
+        
+        if(nextPos.y < 600.0f - _entity->transform.scale.y / 2)
+            _entity->transform.position = nextPos;
+    }
+
+    if (GetKey(_app, SDL_SCANCODE_DOWN) && _entity->name == "RightPaddle")
+    {
+        //printf("%f", _entity->transform.position.y);
+
+        _entity->velocity = InitVector2(0.0f, -1.0f * 150.0f);
+
+        //_entity->transform.position = Vec3Add(_entity->transform.position, Vec2ToVec3(Vec2Mul(_entity->velocity, _app->deltaTime)));
+
+        Vector3 nextPos = Vec3Add(_entity->transform.position, Vec2ToVec3(Vec2Mul(_entity->velocity, _app->deltaTime)));
+        
+        if(nextPos.y > 0.0f + _entity->transform.scale.y / 2)
+            _entity->transform.position = nextPos;
+        
+    }
+
+    else if (GetKey(_app, SDL_SCANCODE_UP) && _entity->name == "RightPaddle")
+    {
+        _entity->velocity = InitVector2(0.0f, 1.0f * 150.0f);
+
+        Vector3 nextPos = Vec3Add(_entity->transform.position, Vec2ToVec3(Vec2Mul(_entity->velocity, _app->deltaTime)));
+        
+        if(nextPos.y < 600.0f - _entity->transform.scale.y / 2)
+            _entity->transform.position = nextPos;
+    }
 }
 
 void PaddleDraw(AppContext* _app, Entity* _entity) {
