@@ -23,6 +23,9 @@ void BallUpdate(AppContext* _app, Entity* _entity) {
 
     Ball* ball = (Ball*)_entity->data;
 
+    Entity* leftPaddle = Find(&(_app->scene), "LeftPaddle");
+    Entity* rightPaddle = Find(&(_app->scene), "RightPaddle");
+
     //if (GetKeyDown(_app, SDL_SCANCODE_P))
     //{
     //    SpawnBall(_app, _entity);
@@ -49,6 +52,22 @@ void BallUpdate(AppContext* _app, Entity* _entity) {
     // check if ball is heading above the screen
     if (_entity->transform.position.y + _entity->transform.scale.y * 0.5f >= _app->windowHeight && _entity->velocity.y > 0.0f)
         _entity->velocity.y *= -1.0f; 
+
+
+    // Left Paddle collision
+    if(_entity->transform.position.x - _entity->transform.scale.x * 0.5f <= leftPaddle->transform.position.x + leftPaddle->transform.scale.x * 0.5f && 
+       _entity->transform.position.x + _entity->transform.scale.x * 0.5f > leftPaddle->transform.position.x  - leftPaddle->transform.scale.x * 0.5f &&
+       _entity->transform.position.y - _entity->transform.scale.x * 0.5f <= leftPaddle->transform.position.y + leftPaddle->transform.scale.y * 0.5f && 
+       _entity->transform.position.y + _entity->transform.scale.x * 0.5f > leftPaddle->transform.position.y  - leftPaddle->transform.scale.y * 0.5f)
+        _entity->velocity.x *= -1;
+
+    // Right Paddle collision
+    if(_entity->transform.position.x + _entity->transform.scale.x * 0.5f > rightPaddle->transform.position.x  - rightPaddle->transform.scale.x * 0.5f && 
+       _entity->transform.position.x - _entity->transform.scale.x * 0.5f <= rightPaddle->transform.position.x + rightPaddle->transform.scale.x * 0.5f &&
+       _entity->transform.position.y + _entity->transform.scale.x * 0.5f > rightPaddle->transform.position.y  - rightPaddle->transform.scale.y * 0.5f && 
+       _entity->transform.position.y - _entity->transform.scale.x * 0.5f <= rightPaddle->transform.position.y + rightPaddle->transform.scale.y * 0.5f)
+        _entity->velocity.x *= -1;
+
 
     Vector3 delta = Vec2ToVec3(Vec2Mul(_entity->velocity, _app->deltaTime));
     _entity->transform.position = Vec3Add(_entity->transform.position, delta);
