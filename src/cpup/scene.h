@@ -6,6 +6,7 @@ typedef struct Scene {
     Entity* entities;
     Entity* startEntities;
     int nextId;
+    bool gameEnded;
 } Scene;
 
 typedef struct AppContext AppContext;
