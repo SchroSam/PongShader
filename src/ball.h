@@ -5,6 +5,7 @@
 #include "cpup/inputmanager.h"
 
 #include <SDL3/SDL.h>
+#include <stdio.h>
 
 typedef struct {
     int leftScore;
@@ -12,6 +13,8 @@ typedef struct {
 } Ball;
 
 Entity* SpawnBall(AppContext* _app, Entity* _entity);
+
+void EndGame(AppContext* _app, Entity* _entity, bool winner);
 
 void BallStart(AppContext* _app, Entity* _entity) {
     _entity->color = InitVector4(1.0f, 1.0f, 1.0f, 1.0f);
@@ -25,6 +28,8 @@ void BallUpdate(AppContext* _app, Entity* _entity) {
 
     Entity* leftPaddle = Find(&(_app->scene), "LeftPaddle");
     Entity* rightPaddle = Find(&(_app->scene), "RightPaddle");
+
+    printf("%f\n", _entity->velocity.x);
 
     //if (GetKeyDown(_app, SDL_SCANCODE_P))
     //{
@@ -59,18 +64,61 @@ void BallUpdate(AppContext* _app, Entity* _entity) {
        _entity->transform.position.x + _entity->transform.scale.x * 0.5f > leftPaddle->transform.position.x  - leftPaddle->transform.scale.x * 0.5f &&
        _entity->transform.position.y - _entity->transform.scale.x * 0.5f <= leftPaddle->transform.position.y + leftPaddle->transform.scale.y * 0.5f && 
        _entity->transform.position.y + _entity->transform.scale.x * 0.5f > leftPaddle->transform.position.y  - leftPaddle->transform.scale.y * 0.5f)
-        _entity->velocity.x *= -1;
+    {
+        _entity->velocity.x = 0.72f * 150;
+        _entity->color = leftPaddle->color;
+    }
 
     // Right Paddle collision
     if(_entity->transform.position.x + _entity->transform.scale.x * 0.5f > rightPaddle->transform.position.x  - rightPaddle->transform.scale.x * 0.5f && 
        _entity->transform.position.x - _entity->transform.scale.x * 0.5f <= rightPaddle->transform.position.x + rightPaddle->transform.scale.x * 0.5f &&
        _entity->transform.position.y + _entity->transform.scale.x * 0.5f > rightPaddle->transform.position.y  - rightPaddle->transform.scale.y * 0.5f && 
        _entity->transform.position.y - _entity->transform.scale.x * 0.5f <= rightPaddle->transform.position.y + rightPaddle->transform.scale.y * 0.5f)
-        _entity->velocity.x *= -1;
+    {
+        _entity->velocity.x = -0.72f * 150;
+        _entity->color = rightPaddle->color;
+    }
+
+    // Off screen left
+    if(_entity->transform.position.x + _entity->transform.scale.x * 0.5f <= 0.0f)
+    {
+        _entity->transform.position = InitVector3(_app->windowWidth * 0.5f, _app->windowHeight * 0.5f, 0.0f);
+        _entity->velocity = InitVector2(0.0f, 0.0f);
+        _entity->color = InitVector4(1.0f, 1.0f, 1.0f, 1.0f);
+
+        char title[50];
+        sprintf(title, "Left Score - %d : Right Score - %d", ball->leftScore, ++ball->rightScore);
+        SetWindowTitle(_app, title);
+    }
+
+    // Off screen right
+    if(_entity->transform.position.x - _entity->transform.scale.x * 0.5f >= _app->windowWidth)
+    {
+        _entity->transform.position = InitVector3(_app->windowWidth * 0.5f, _app->windowHeight * 0.5f, 0.0f);
+        _entity->velocity = InitVector2(0.0f, 0.0f);
+        _entity->color = InitVector4(1.0f, 1.0f, 1.0f, 1.0f);
+
+        char title[50];
+        sprintf(title, "Left Score - %d : Right Score - %d", ++ball->leftScore, ball->rightScore);
+        SetWindowTitle(_app, title);
+    }
+
+    if(ball->leftScore >= 5)
+        EndGame(_app, _entity, true);
+
+    else if(ball->rightScore >= 5)
+        EndGame(_app, _entity, false);
 
 
     Vector3 delta = Vec2ToVec3(Vec2Mul(_entity->velocity, _app->deltaTime));
     _entity->transform.position = Vec3Add(_entity->transform.position, delta);
+}
+
+// winner == true means left player wins, winner == false means right player wins
+void EndGame(AppContext* _app, Entity* _entity, bool winner){
+
+    exit(0);
+
 }
 
 void BallDraw(AppContext* _app, Entity* _entity) {

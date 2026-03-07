@@ -113,6 +113,9 @@ int main(int argc, char *argv[])
     
     bool running = true;
     f32 time = 0.0f;
+
+    SetWindowTitle(&app, "Left Score - 0 : Right Score - 0");
+
     while(running) {
         // imput
         InputManagerNewFrame(&app);
