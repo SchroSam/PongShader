@@ -3,6 +3,7 @@
 #include "cpup/scene.h"
 #include "cpup/model.h"
 #include "cpup/inputmanager.h"
+#include "paddle.h"
 
 #include <SDL3/SDL.h>
 #include <stdio.h>
@@ -10,6 +11,7 @@
 typedef struct {
     int leftScore;
     int rightScore;
+    Vector3 trail[100];
 } Ball;
 
 Entity* SpawnBall(AppContext* _app, Entity* _entity);
@@ -34,16 +36,25 @@ void BallStart(AppContext* _app, Entity* _entity) {
     }
 
         _entity->transform.scale = InitVector3(32.0f, 32.0f, 1.0f);
+
+    Ball* ball = (Ball*)_entity->data;
+    // ball->trailIndex = 0;
+    // ball->trailUpdateCounter = 0;
+    // for(int i = 0; i < 10; i++) {
+    //     ball->trail[i] = InitVector3(-1000.0f, -1000.0f, 0.0f);
+    // }
 }
 
 void BallUpdate(AppContext* _app, Entity* _entity) {
+
+    f32 time = 0.0f;
 
     Ball* ball = (Ball*)_entity->data;
 
     Entity* leftPaddle = Find(&(_app->scene), "LeftPaddle");
     Entity* rightPaddle = Find(&(_app->scene), "RightPaddle");
 
-    printf("%f\n", _entity->velocity.x);
+    //printf("%f\n", _entity->velocity.x);
 
     //if (GetKeyDown(_app, SDL_SCANCODE_P))
     //{
@@ -84,6 +95,7 @@ void BallUpdate(AppContext* _app, Entity* _entity) {
         {
             _entity->velocity.x = 0.72f * 150;
             _entity->color = leftPaddle->color;
+            ((Paddle*)leftPaddle->data)->bounceVelocity = InitVector2(10.0f, 0.0f);
         }
 
         // Right Paddle collision
@@ -94,6 +106,7 @@ void BallUpdate(AppContext* _app, Entity* _entity) {
         {
             _entity->velocity.x = -0.72f * 150;
             _entity->color = rightPaddle->color;
+            ((Paddle*)rightPaddle->data)->bounceVelocity = InitVector2(-10.0f, 0.0f);
         }
 
         // Off screen left
@@ -143,6 +156,16 @@ void BallUpdate(AppContext* _app, Entity* _entity) {
 
     Vector3 delta = Vec2ToVec3(Vec2Mul(_entity->velocity, _app->deltaTime));
     _entity->transform.position = Vec3Add(_entity->transform.position, delta);
+
+    // // Update trail if moving
+    // if (Vec2Magnitude(_entity->velocity) > 0.0f) {
+    //     ball->trailUpdateCounter++;
+    //     if (ball->trailUpdateCounter >= 3) {
+    //         ball->trailUpdateCounter = 0;
+    //         ball->trail[ball->trailIndex] = _entity->transform.position;
+    //         ball->trailIndex = (ball->trailIndex + 1) % 10;
+    //     }
+    // }
 }
 
 
@@ -152,6 +175,33 @@ void EndGame(AppContext* _app, Entity* _entity){
 }
 
 void BallDraw(AppContext* _app, Entity* _entity) {
+    Ball* ball = (Ball*)_entity->data;
+
+    // Draw trail
+    // for(int i = 6; i < 11; i++) {
+    //     int idx = (ball->trailIndex - i + 100) % 10;
+    //     if (ball->trail[idx].x < -500.0f) continue; // skip invalid
+    //     Matrix4 transform = IdentityMatrix4();
+    //     Mat4Translate(&transform, ball->trail[idx]);
+    //     Mat4Rotate(&transform, _entity->transform.rotation * DEG2RAD, InitVector3(0.0f, 0.0f, 1.0f));
+    //     Mat4Scale(&transform, Vec3Mul(InitVector3(_entity->transform.scale.x, _entity->transform.scale.y, _entity->transform.scale.z), 1.0f - (float)(i-5) / 10.0f));
+
+    //     BindShader(_entity->shaderId);
+
+    //     ShaderSetFloat(_entity->shaderId, "TIME", _app->time);
+    //     ShaderSetMatrix4(_entity->shaderId, "VIEW", _app->view);
+    //     ShaderSetMatrix4(_entity->shaderId, "PROJECTION", _app->projection);
+
+    //     float alpha = 1.0f - (float)i / 10.0f;
+    //     ShaderSetVector4(_entity->shaderId, "COLOR", InitVector4(_entity->color.x, _entity->color.y, _entity->color.z, alpha));
+    //     ShaderBindTexture(_entity->shaderId, _entity->image->id, "MAIN_TEXTURE", 0);
+    //     ShaderSetMatrix4(_entity->shaderId, "TRANSFORM", transform);
+    //     DrawModel(*_entity->model);
+
+    //     UnBindShader();
+    // }
+
+    // Draw main ball
     Matrix4 transform = IdentityMatrix4(); // the order is important
     Mat4Translate(&transform, _entity->transform.position);
     Mat4Rotate(&transform, _entity->transform.rotation * DEG2RAD, InitVector3(0.0f, 0.0f, 1.0f));

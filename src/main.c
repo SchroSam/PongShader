@@ -25,6 +25,7 @@
 
 #include "ball.h"
 #include "paddle.h"
+#include "background.h"
 
 AppContext app;
 
@@ -48,10 +49,17 @@ int main(int argc, char *argv[])
     Image containerImage = IOLoadImage("assets/textures/container.tga");
     Image circleImage = IOLoadImage("assets/textures/circle.tga");
     Image squareImage = IOLoadImage("assets/textures/square.tga");
+    Image gridImage = IOLoadImage("assets/textures/blue-grid.tga");
     
     // build and compile our shader program
     u32 shaderProgram = GenerateShaderFromFiles("assets/shaders/logo.vs", "assets/shaders/logo.fs");
     printf("shaderID: %i\n", shaderProgram);
+
+    u32 paddleShader = GenerateShaderFromFiles("assets/shaders/paddle.vs", "assets/shaders/logo.fs");
+    printf("paddleShaderID: %i\n", paddleShader);
+
+    u32 shader2 = GenerateShaderFromFiles("assets/shaders/backGround.vs", "assets/shaders/logo.fs");
+    printf("shaderID: %i\n", shader2);
 
     float ve[] = {
         // positions            // texture coords
@@ -73,6 +81,17 @@ int main(int argc, char *argv[])
     
     Model model = BuildModel(&vertices, &indices, STATIC_DRAW);
 
+    Entity* backGround = Spawn(&scene);
+    backGround->transform.position = InitVector3(app.windowWidth * 0.5f, app.windowHeight * 0.5f, -1.0f);
+    backGround->image = &gridImage;
+    backGround->model = &model;
+    backGround->shaderId = shader2;
+    backGround->Start = BackgroundStart;
+    backGround->Update = BackgroundUpdate;
+    backGround->Draw = BackgroundDraw;
+    backGround->name = "Grid";
+    backGround->color = InitVector4(0.7f, 0.7f, 0.7f, 1.0f);
+
     Entity* ball = Spawn(&scene);
     ball->transform.position = InitVector3(app.windowWidth * 0.5f, app.windowHeight * 0.5f, 0.0f);
     ball->data = calloc(1, sizeof(Ball));
@@ -90,7 +109,7 @@ int main(int argc, char *argv[])
     leftPaddle->data = calloc(1, sizeof(Paddle));
     leftPaddle->image = &squareImage;
     leftPaddle->model = &model;
-    leftPaddle->shaderId = shaderProgram;
+    leftPaddle->shaderId = paddleShader;
     leftPaddle->name = "LeftPaddle";
     leftPaddle->Start = PaddleStart;
     leftPaddle->Update = PaddleUpdate;
@@ -103,7 +122,7 @@ int main(int argc, char *argv[])
     rightPaddle->data = calloc(1, sizeof(Paddle));
     rightPaddle->image = &squareImage;
     rightPaddle->model = &model;
-    rightPaddle->shaderId = shaderProgram;
+    rightPaddle->shaderId = paddleShader;
     rightPaddle->name = "RightPaddle";
     rightPaddle->Start = PaddleStart;
     rightPaddle->Update = PaddleUpdate;
@@ -155,11 +174,14 @@ int main(int argc, char *argv[])
     free(containerImage.data);
     free(circleImage.data);
     free(squareImage.data);
+    free(gridImage.data);
 
     SceneFree(&scene);
 
     FreeWindow(&app);
 
     DeleteShader(shaderProgram);
+    DeleteShader(paddleShader);
+    DeleteShader(shader2);
     return 0;
 }

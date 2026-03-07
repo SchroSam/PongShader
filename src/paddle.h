@@ -9,6 +9,7 @@
 
 typedef struct {
     int var;
+    Vector2 bounceVelocity;
 } Paddle;
 
 void PaddleStart(AppContext* _app, Entity* _entity) {
@@ -19,6 +20,7 @@ void PaddleStart(AppContext* _app, Entity* _entity) {
 
     _entity->transform.rotation = 0.0f;
     _entity->transform.scale = InitVector3(32.0f, 128.0f, 1.0f);
+
 }
 
 void PaddleUpdate(AppContext* _app, Entity* _entity) {
@@ -67,6 +69,10 @@ void PaddleUpdate(AppContext* _app, Entity* _entity) {
         if(nextPos.y < 600.0f - _entity->transform.scale.y / 2)
             _entity->transform.position = nextPos;
     }
+
+    // Decay bounce for visual effect
+    Paddle* paddle = (Paddle*)_entity->data;
+    paddle->bounceVelocity = Vec2Mul(paddle->bounceVelocity, 0.9f);
 }
 
 void PaddleDraw(AppContext* _app, Entity* _entity) {
@@ -81,6 +87,8 @@ void PaddleDraw(AppContext* _app, Entity* _entity) {
     ShaderSetMatrix4(_entity->shaderId, "VIEW", _app->view);
     ShaderSetMatrix4(_entity->shaderId, "PROJECTION", _app->projection);
 
+    Paddle* paddle = (Paddle*)_entity->data;
+    ShaderSetFloat(_entity->shaderId, "BOUNCE_X", paddle->bounceVelocity.x / _entity->transform.scale.x);
     ShaderSetVector4(_entity->shaderId, "COLOR", _entity->color);
     ShaderBindTexture(_entity->shaderId, _entity->image->id, "MAIN_TEXTURE", 0);
     ShaderSetMatrix4(_entity->shaderId, "TRANSFORM", transform);
