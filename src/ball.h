@@ -78,10 +78,11 @@ void BallUpdate(AppContext* _app, Entity* _entity) {
     if(_app->scene->gameEnded == false) // only check for collisions if the game is still going
     {
         static float tempTime = 0.0f;
+        static float velocityMod = 150.0f;
 
         // ball trail
         if(!Vec2EqualsZero(_entity->velocity) && _app->time - tempTime >= 0.5f){
-            printf("ball trail!\n");
+            //printf("ball trail!\n");
             tempTime = _app->time;
             SpawnTrailNode(_app, _entity);
         }
@@ -101,7 +102,8 @@ void BallUpdate(AppContext* _app, Entity* _entity) {
         _entity->transform.position.y - _entity->transform.scale.x * 0.5f <= leftPaddle->transform.position.y + leftPaddle->transform.scale.y * 0.5f && 
         _entity->transform.position.y + _entity->transform.scale.x * 0.5f > leftPaddle->transform.position.y  - leftPaddle->transform.scale.y * 0.5f)
         {
-            _entity->velocity.x = 0.72f * 150;
+            velocityMod *= 1.2;
+            _entity->velocity.x = 0.72f * velocityMod;
             _entity->color = leftPaddle->color;
             ((Paddle*)leftPaddle->data)->bounceVelocity = InitVector2(10.0f, 0.0f);
         }
@@ -112,7 +114,8 @@ void BallUpdate(AppContext* _app, Entity* _entity) {
         _entity->transform.position.y + _entity->transform.scale.x * 0.5f > rightPaddle->transform.position.y  - rightPaddle->transform.scale.y * 0.5f && 
         _entity->transform.position.y - _entity->transform.scale.x * 0.5f <= rightPaddle->transform.position.y + rightPaddle->transform.scale.y * 0.5f)
         {
-            _entity->velocity.x = -0.72f * 150;
+            velocityMod *= 1.2;
+            _entity->velocity.x = -0.72f * velocityMod;
             _entity->color = rightPaddle->color;
             ((Paddle*)rightPaddle->data)->bounceVelocity = InitVector2(-10.0f, 0.0f);
         }
