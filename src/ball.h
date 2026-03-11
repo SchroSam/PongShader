@@ -4,6 +4,7 @@
 #include "cpup/model.h"
 #include "cpup/inputmanager.h"
 #include "paddle.h"
+#include "trailBall.h"
 
 #include <SDL3/SDL.h>
 #include <stdio.h>
@@ -11,7 +12,6 @@
 typedef struct {
     int leftScore;
     int rightScore;
-    Vector3 trail[100];
 } Ball;
 
 Entity* SpawnBall(AppContext* _app, Entity* _entity);
@@ -77,6 +77,14 @@ void BallUpdate(AppContext* _app, Entity* _entity) {
 
     if(_app->scene->gameEnded == false) // only check for collisions if the game is still going
     {
+        static float tempTime = 0.0f;
+
+        // ball trail
+        if(!Vec2EqualsZero(_entity->velocity) && _app->time - tempTime >= 0.5f){
+            printf("ball trail!\n");
+            tempTime = _app->time;
+            SpawnTrailNode(_app, _entity);
+        }
 
         // check if ball is heading below the screen
         if (_entity->transform.position.y - _entity->transform.scale.y * 0.5f <= 0.0f && _entity->velocity.y < 0.0f)
@@ -157,15 +165,6 @@ void BallUpdate(AppContext* _app, Entity* _entity) {
     Vector3 delta = Vec2ToVec3(Vec2Mul(_entity->velocity, _app->deltaTime));
     _entity->transform.position = Vec3Add(_entity->transform.position, delta);
 
-    // // Update trail if moving
-    // if (Vec2Magnitude(_entity->velocity) > 0.0f) {
-    //     ball->trailUpdateCounter++;
-    //     if (ball->trailUpdateCounter >= 3) {
-    //         ball->trailUpdateCounter = 0;
-    //         ball->trail[ball->trailIndex] = _entity->transform.position;
-    //         ball->trailIndex = (ball->trailIndex + 1) % 10;
-    //     }
-    // }
 }
 
 
